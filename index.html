@@ -197,13 +197,14 @@ function detail(p){
 }
 
 function inbox(){
+ const fresh=new Set(S.notes.filter(n=>!n.read).map(n=>n.id));
+ S.notes.forEach(n=>n.read=true);save();
  bar(`<button class="back" id="back">${backIc}Back</button>`);
  const list=[...S.notes].sort((a,b)=>b.t-a.t);
  const title=id=>{const p=S.posts.find(x=>x.id===id);return p?p.title:""};
  $("#app").innerHTML=`<div class="wrap detail"><h2>Notifications</h2>
- ${list.length?list.map(n=>`<button class="note-i${n.read?"":" unread"}" data-post="${n.post}">${n.kind==="cents"?av(n.who):`<span class="ic">✓</span>`}<span class="tx">${n.kind==="cents"?`<b>${esc(n.who)}</b> gave ${esc(n.pron)} 2 cents`:`<b>${n.n} people</b> have been there`}<span class="q">on “${esc(title(n.post))}”</span><span class="when">${ago(n.t)}</span></span></button>`).join(""):`<div class="empty">Nothing yet. When someone gives their 2 cents on your post, you'll see it here.</div>`}</div>`;
+ ${list.length?list.map(n=>`<button class="note-i${fresh.has(n.id)?" unread":""}" data-post="${n.post}">${n.kind==="cents"?av(n.who):`<span class="ic">✓</span>`}<span class="tx">${n.kind==="cents"?`<b>${esc(n.who)}</b> gave ${esc(n.pron)} 2 cents`:`<b>${n.n} people</b> have been there`}<span class="q">on “${esc(title(n.post))}”</span><span class="when">${ago(n.t)}</span></span></button>`).join(""):`<div class="empty">Nothing yet. When someone gives their 2 cents on your post, you'll see it here.</div>`}</div>`;
  document.querySelectorAll("[data-post]").forEach(b=>b.onclick=()=>{location.hash="post-"+b.dataset.post});
- S.notes.forEach(n=>n.read=true);save();
 }
 
 function sheet(html){const d=document.createElement("div");d.className="sheet";d.innerHTML=html;document.body.appendChild(d);document.body.style.overflow="hidden";const close=()=>{d.remove();document.body.style.overflow=""};d.onclick=e=>{if(e.target===d)close()};d.querySelector(".ghost").onclick=close;return close}
