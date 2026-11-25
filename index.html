@@ -1,0 +1,199 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SafeSpace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday, warm and calm
+   IDEA a kitchen-table noticeboard: someone pins a problem, people who lived it leave advice
+   PICTURE the feed itself, as a real shipped app
+   COLOUR white ground, near-black ink, marigold field, coral for giving advice, sage for "been there"
+   TYPE Familjen Grotesk + Inter
+   LAYOUT one app column (max 640px) with sticky bar and floating Ask button; phone is the same column */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#141311);--ink:light-dark(#1b1a17,#f3efe6);--mute:light-dark(#6b6559,#a8a191);--line:light-dark(#ebe6da,#2c2a25);--card:light-dark(#ffffff,#1c1b18);--sun:light-dark(#ffc93c,#e0a91c);--sunink:#1b1a17;--coral:light-dark(#e8553a,#ff7a5c);--sage:light-dark(#dcefe0,#203a2a);--sageink:light-dark(#2d6a41,#a7dcb6);--soft:light-dark(#faf6ec,#1f1d19)}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Familjen Grotesk",system-ui,sans-serif;letter-spacing:-.02em;line-height:1.1;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:640px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--sun);z-index:30}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--sun);color:var(--sunink)}
+.bar .wrap{display:flex;align-items:center;gap:12px;height:60px}
+.logo{display:flex;align-items:center;gap:10px;font-family:"Familjen Grotesk";font-weight:700;font-size:22px;letter-spacing:-.02em}
+.logo svg{width:30px;height:30px}
+.bar .sp{flex:1}
+.back{border:0;background:none;font-weight:600;padding:8px 4px;display:flex;align-items:center;gap:6px;color:var(--sunink)}
+.hero{background:var(--sun);color:var(--sunink);padding-block:8px 22px}
+.hero h1{font-size:clamp(30px,7vw,42px);font-weight:700;max-width:14em}
+.hero p{margin:8px 0 0;font-size:16px;max-width:34em;opacity:.85}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-block:14px;scrollbar-width:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:8px 14px;font-size:14px;font-weight:500;white-space:nowrap}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sort{display:flex;gap:18px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.sort button{border:0;background:none;padding:10px 0;font-size:14px;font-weight:600;color:var(--mute);border-bottom:2px solid transparent;margin-bottom:-1px}
+.sort button[aria-pressed=true]{color:var(--ink);border-color:var(--coral)}
+.post{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:18px 0}
+.post:hover h3{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:13px;color:var(--mute)}
+.av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:#1b1a17;flex:none}
+.name{font-weight:600;color:var(--ink)}
+.tag{font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--soft);color:var(--mute)}
+.solved{background:var(--sage);color:var(--sageink)}
+.post h3{font-size:20px;font-weight:600;margin:10px 0 6px}
+.post p{margin:0;color:var(--mute);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.stats{display:flex;gap:16px;margin-top:12px;font-size:13px;color:var(--mute);font-weight:500}
+.stats b{color:var(--ink)}
+.fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:25;border:0;background:var(--coral);color:#fff;font-weight:600;font-size:16px;border-radius:99px;padding:15px 22px;display:flex;gap:8px;align-items:center;box-shadow:0 6px 18px color-mix(in srgb,var(--coral) 35%,transparent)}
+@media(min-width:760px){.fab{right:calc(50% - 320px)}}
+.detail{padding-block:20px 120px}
+.detail h2{font-size:clamp(26px,6vw,34px);font-weight:700;margin:14px 0 12px}
+.detail .body{font-size:17px;white-space:pre-line}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 8px}
+.pill{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:10px 16px;font-size:14px;font-weight:600;display:flex;gap:6px;align-items:center;min-height:44px}
+.pill[aria-pressed=true]{background:var(--sage);color:var(--sageink);border-color:transparent}
+.sec{display:flex;justify-content:space-between;align-items:baseline;margin:28px 0 6px;padding-top:20px;border-top:1px solid var(--line)}
+.sec h3{font-size:20px}
+.sec span{font-size:13px;color:var(--mute)}
+.adv{padding:16px 0;border-bottom:1px solid var(--line)}
+.adv.best{background:var(--sage);border:0;border-radius:16px;padding:16px;margin:10px 0}
+.adv .txt{margin:10px 0 0;white-space:pre-line}
+.lived{font-size:12px;font-weight:600;color:var(--sageink)}
+.adv .row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.adv .row .pill{min-height:36px;padding:6px 12px;font-size:13px}
+.best .pill{background:transparent;border-color:color-mix(in srgb,var(--sageink) 30%,transparent)}
+.bestlbl{font-size:13px;font-weight:700;color:var(--sageink);margin-bottom:8px}
+.give{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--bg);border-top:1px solid var(--line);padding-block:12px calc(12px + env(safe-area-inset-bottom,0px))}
+.give form{display:flex;flex-direction:column;gap:8px}
+.give .r{display:flex;gap:8px;align-items:flex-end}
+textarea,input[type=text],select{font:16px/1.4 Inter,system-ui,sans-serif;color:var(--ink);background:var(--card);border:1px solid color-mix(in srgb,var(--ink) 22%,transparent);border-radius:14px;padding:12px 14px;width:100%}
+textarea{resize:none}
+textarea:focus,input:focus,select:focus,button:focus-visible{outline:2px solid var(--coral);outline-offset:1px}
+.send{border:0;background:var(--coral);color:#fff;font-weight:600;border-radius:14px;padding:0 18px;height:48px;flex:none}
+.send:disabled{opacity:.45;cursor:default}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--mute)}
+.chk input{width:18px;height:18px;accent-color:var(--coral)}
+.sheet{position:fixed;inset:0;z-index:40;background:color-mix(in srgb,#000 45%,transparent);display:flex;align-items:flex-end;justify-content:center}
+.panel{background:var(--bg);width:100%;max-width:640px;border-radius:22px 22px 0 0;padding:22px max(16px,env(safe-area-inset-left,0px)) calc(20px + env(safe-area-inset-bottom,0px));max-height:92svh;overflow:auto}
+.panel h2{font-size:28px;margin-bottom:4px}
+.panel .sub{color:var(--mute);margin:0 0 16px}
+.panel label{display:block;font-size:14px;font-weight:600;margin:14px 0 6px}
+.panel .foot{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;align-items:center}
+.ghost{border:0;background:none;padding:12px;font-weight:600;color:var(--mute)}
+.hint{font-size:13px;color:var(--mute);margin-top:6px}
+.empty{padding:48px 0;text-align:center;color:var(--mute)}
+.note{font-size:13px;color:var(--mute);padding-block:24px 110px;text-align:center}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;font-size:14px;font-weight:500;z-index:50}
+</style>
+</head><body>
+
+<header class="bar"><div class="wrap" id="barIn"></div></header>
+<main id="app"></main>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+{
+const CATS=["All","Life advice","Family","Home & body","Work & school","Money","Weird & niche"];
+const COLORS=["#ffc93c","#9fd8b0","#ffb4a2","#b9d3ff","#f5c2e7","#d9e88f"];
+const now=Date.now(),H=36e5;
+const seed=[
+ {id:1,author:"Tolu",anon:false,cat:"Weird & niche",t:now-5*H,title:"I stub my toe on the same door every single morning",body:"Bedroom door, right foot, every morning on the way to the bathroom. I know it's there. I still hit it. Am I cursed or is there an actual reason this keeps happening?",relate:41,mine:false,best:11,advice:[
+  {id:11,author:"Marcus",lived:true,t:now-4*H,txt:"Same thing happened to me for a year. It was the door, not me. When you wake up you walk the line your feet learned, and my door was opened about 20cm less than it used to be because a laundry basket moved behind it. Open it fully or leave it fully shut every night so the edge is always in the same place.\n\nAlso: a cheap motion nightlight at ankle height. Fixed it in a week.",helped:63},
+  {id:12,author:"Anonymous",lived:true,t:now-3*H,txt:"Check whether you're turning before you're past the frame. Half-asleep you cut the corner. I put a small rug just past the door and it nudged my path wider.",helped:18},
+  {id:13,author:"Grace",lived:false,t:now-2*H,txt:"Slippers by the bed. Not a fix for the cause but your toe will thank you.",helped:7}]},
+ {id:2,author:"Anonymous",anon:true,cat:"Family",t:now-9*H,title:"My dad wasn't around. Who teaches you the stuff he would have?",body:"I'm 24. Nobody showed me how to shave properly, how to negotiate when buying a car, or how to tell when a friend is actually a bad influence. I feel behind on things everyone else just seems to know. Where did you learn this stuff?",relate:128,mine:false,best:null,advice:[
+  {id:21,author:"Uncle Dee",lived:true,t:now-8*H,txt:"Grew up the same way. What worked for me: pick one older man you respect (a coworker, a barber, a coach) and ask him one specific question. \"How do you deal with a car salesman?\" People love being asked. Over a few years you collect a whole set of dads.",helped:94},
+  {id:22,author:"Femi",lived:true,t:now-6*H,txt:"Shaving: hot shower first, shave with the grain, rinse the blade every stroke, cold water after. Took me until 27 to learn that. You're not behind, you're just learning it on your own schedule.",helped:51}]},
+ {id:3,author:"Priya",anon:false,cat:"Work & school",t:now-26*H,title:"I freeze up every time I have to make a phone call",body:"Booking a doctor's appointment takes me three days of building up to it. Texting and email are fine. Has anyone actually got over this?",relate:212,mine:false,best:31,advice:[
+  {id:31,author:"Jamal",lived:true,t:now-24*H,txt:"Write a three-line script before you dial: who you are, what you want, one backup question. Keep it in front of you. Nobody on the other end knows you're reading. After ten calls with a script I stopped needing it.",helped:140},
+  {id:32,author:"Anonymous",lived:true,t:now-20*H,txt:"Make the call within 60 seconds of deciding to. Every minute you wait the call gets bigger in your head.",helped:66}]},
+ {id:4,author:"Kemi",anon:false,cat:"Home & body",t:now-30*H,title:"Every plant I buy dies within a month",body:"I water them. I talk to them. Basil, a fern, even a cactus. Three weeks and they're gone. What am I missing?",relate:37,mine:false,best:null,advice:[
+  {id:41,author:"Ruth",lived:true,t:now-28*H,txt:"You are almost certainly overwatering. I killed eleven plants with love. Stick a finger 2cm into the soil and only water when it's dry at that depth. Cactus: once every two to three weeks, max.",helped:29}]},
+ {id:5,author:"Anonymous",anon:true,cat:"Life advice",t:now-50*H,title:"How do I tell my parents I'm leaving medicine?",body:"Second year of med school, and I know it's not for me. My parents sacrificed a lot to get me here. I want to do design. I don't know how to start that conversation without breaking their hearts.",relate:89,mine:false,best:null,advice:[
+  {id:51,author:"Ade",lived:true,t:now-47*H,txt:"I left law school. What helped: I came with a plan, not just a no. Which course, how I'd pay for it, what the first year looked like. My parents weren't upset that I was quitting, they were scared I'd have nothing. The plan answered the fear.",helped:77},
+  {id:52,author:"Nkechi",lived:false,t:now-40*H,txt:"Thank them first, and mean it. Then tell them. Starting with gratitude changes how everything after it is heard.",helped:34}]},
+ {id:6,author:"Sam",anon:false,cat:"Money",t:now-72*H,title:"Friend borrowed money six months ago and acts like it never happened",body:"It's not a huge amount, but it's not nothing either. I don't want to lose the friendship. How do I bring it up?",relate:64,mine:false,best:null,advice:[]}
+];
+const ME="You";
+let S;
+try{S=JSON.parse(localStorage.getItem("ss-state")||"null")}catch(e){}
+if(!S||!S.posts)S={posts:seed,relates:{},helps:{}};
+const save=()=>{try{localStorage.setItem("ss-state",JSON.stringify(S))}catch(e){}};
+let cat="All",sort="fresh";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ago=t=>{const m=Math.round((Date.now()-t)/6e4);if(m<1)return"just now";if(m<60)return m+"m ago";const h=Math.round(m/60);if(h<24)return h+"h ago";const d=Math.round(h/24);return d+"d ago"};
+const col=n=>{let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))%997;return COLORS[h%COLORS.length]};
+const av=n=>n==="Anonymous"?`<span class="av" style="background:var(--soft);color:var(--mute)">?</span>`:`<span class="av" style="background:${col(n)}">${esc(n[0].toUpperCase())}</span>`;
+const plural=(n,w)=>n+" "+w+(n===1?"":"s");
+const logo=`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 9a5 5 0 0 1 5-5h12a5 5 0 0 1 5 5v9a5 5 0 0 1-5 5h-7l-6 5v-5H10a5 5 0 0 1-5-5z" fill="#1b1a17"/><path d="M16 18.5s-5-3-5-6.2A2.6 2.6 0 0 1 16 11a2.6 2.6 0 0 1 5 1.3c0 3.2-5 6.2-5 6.2z" fill="#ffc93c"/></svg>`;
+function toast(m){const el=$("#toast");el.textContent=m;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2200)}
+
+function feed(){
+ $("#barIn").innerHTML=`<div class="logo">${logo}SafeSpace</div><span class="sp"></span>`;
+ let list=S.posts.filter(p=>cat==="All"||p.cat===cat||(cat==="Mine"&&p.mine));
+ if(sort==="fresh")list.sort((a,b)=>b.t-a.t);
+ else if(sort==="helped")list.sort((a,b)=>b.relate-a.relate);
+ else list=list.filter(p=>!p.advice.length).sort((a,b)=>b.t-a.t);
+ const cats=[...CATS,"Mine"];
+ $("#app").innerHTML=`<section class="hero"><div class="wrap"><h1>Someone has been through it. Ask them.</h1><p>Post the thing that's been bugging you, big or tiny. People who lived it leave advice.</p></div></section>
+ <div class="wrap"><nav class="chips" aria-label="Topics">${cats.map(c=>`<button class="chip" data-cat="${esc(c)}" aria-pressed="${c===cat}">${c==="Mine"?"My posts":esc(c)}</button>`).join("")}</nav>
+ <div class="sort">${[["fresh","Fresh"],["helped","Most relatable"],["none","Needs advice"]].map(([k,l])=>`<button data-sort="${k}" aria-pressed="${k===sort}">${l}</button>`).join("")}</div>
+ ${list.length?list.map(p=>`<button class="post" data-open="${p.id}"><div class="meta">${av(p.author)}<span class="name">${esc(p.author)}</span><span>${ago(p.t)}</span><span class="tag">${esc(p.cat)}</span>${p.best?`<span class="tag solved">Sorted</span>`:""}</div><h3>${esc(p.title)}</h3><p>${esc(p.body)}</p><div class="stats"><span><b>${p.relate}</b> been there</span><span><b>${p.advice.length}</b> ${p.advice.length===1?"piece":"pieces"} of advice</span></div></button>`).join(""):`<div class="empty">${cat==="Mine"?"You haven't asked anything yet. Tap Ask to share what's on your mind.":"Nothing here yet. Be the first to ask."}</div>`}
+ <p class="note">Prototype with sample posts. Anything you add stays in this browser only.</p></div>
+ <button class="fab" id="ask"><svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v14M3 10h14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>Ask</button>`;
+ document.querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>{cat=b.dataset.cat;feed()});
+ document.querySelectorAll("[data-sort]").forEach(b=>b.onclick=()=>{sort=b.dataset.sort;feed()});
+ document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{location.hash="post-"+b.dataset.open});
+ $("#ask").onclick=compose;
+}
+
+function detail(p){
+ $("#barIn").innerHTML=`<button class="back" id="back"><svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M12 4l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</button><span class="sp"></span><div class="logo" style="font-size:18px">${logo}</div>`;
+ $("#back").onclick=()=>{location.hash=""};
+ const rel=!!S.relates[p.id];
+ const adv=[...p.advice].sort((a,b)=>(b.id===p.best)-(a.id===p.best)||b.helped-a.helped);
+ const one=a=>{const h=!!S.helps[a.id],best=a.id===p.best;return`<article class="adv${best?" best":""}">${best?`<div class="bestlbl">✓ ${p.mine?"You":esc(p.author)} said this sorted it</div>`:""}<div class="meta">${av(a.author)}<span class="name">${esc(a.author)}</span><span>${ago(a.t)}</span>${a.lived?`<span class="lived">Been through it</span>`:""}</div><p class="txt">${esc(a.txt)}</p><div class="row"><button class="pill" data-help="${a.id}" aria-pressed="${h}">${h?"Helped you":"This helped"} · ${a.helped}</button>${p.mine&&!best?`<button class="pill" data-best="${a.id}">Mark as what sorted it</button>`:""}</div></article>`};
+ $("#app").innerHTML=`<div class="wrap detail"><div class="meta">${av(p.author)}<span class="name">${esc(p.author)}</span><span>${ago(p.t)}</span><span class="tag">${esc(p.cat)}</span></div>
+ <h2>${esc(p.title)}</h2><div class="body">${esc(p.body)}</div>
+ <div class="acts"><button class="pill" id="rel" aria-pressed="${rel}">${rel?"You've been there too":"I've been there"} · ${p.relate}</button></div>
+ <div class="sec"><h3>Advice</h3><span>${plural(p.advice.length,"person")} weighed in</span></div>
+ ${adv.length?adv.map(one).join(""):`<div class="empty">No advice yet. If you've lived this, you might be exactly who they need.</div>`}</div>
+ <div class="give"><div class="wrap"><form id="gf"><div class="r"><textarea id="gtxt" rows="1" placeholder="Share what worked for you…" aria-label="Your advice"></textarea><button class="send" id="gsend" disabled>Give advice</button></div><label class="chk"><input type="checkbox" id="glived" checked>I've been through this myself</label></form></div></div>`;
+ $("#rel").onclick=()=>{S.relates[p.id]=!rel;p.relate+=rel?-1:1;save();detail(p)};
+ document.querySelectorAll("[data-help]").forEach(b=>b.onclick=()=>{const id=+b.dataset.help,a=p.advice.find(x=>x.id===id),on=!!S.helps[id];S.helps[id]=!on;a.helped+=on?-1:1;save();detail(p)});
+ document.querySelectorAll("[data-best]").forEach(b=>b.onclick=()=>{p.best=+b.dataset.best;save();detail(p);toast("Marked as sorted. Thank you for closing the loop.")});
+ const ta=$("#gtxt"),sb=$("#gsend");
+ ta.oninput=()=>{ta.style.height="auto";ta.style.height=Math.min(ta.scrollHeight,160)+"px";sb.disabled=!ta.value.trim()};
+ $("#gf").onsubmit=e=>{e.preventDefault();const v=ta.value.trim();if(!v)return;p.advice.push({id:Date.now(),author:ME,lived:$("#glived").checked,t:Date.now(),txt:v,helped:0});save();detail(p);toast("Advice shared. Someone needed that.");window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"})};
+}
+
+function compose(){
+ const d=document.createElement("div");d.className="sheet";
+ d.innerHTML=`<form class="panel" id="cf"><h2>What's on your mind?</h2><p class="sub">Big or tiny, someone out there has dealt with it.</p>
+ <label for="ct">The short version</label><input type="text" id="ct" maxlength="120" placeholder="e.g. My neighbour's dog barks only when I'm on calls">
+ <label for="cb">The details</label><textarea id="cb" rows="5" placeholder="What happens, what you've tried, what you'd love to know"></textarea>
+ <label for="cc">Topic</label><select id="cc">${CATS.slice(1).map(c=>`<option>${esc(c)}</option>`).join("")}</select>
+ <label class="chk" style="font-weight:500;margin-top:16px"><input type="checkbox" id="ca">Post anonymously</label>
+ <p class="hint">Be kind, be specific. Advice from people who've lived it shows a "Been through it" mark.</p>
+ <div class="foot"><button type="button" class="ghost" id="cx">Cancel</button><button class="send" id="cs" disabled>Post</button></div></form>`;
+ document.body.appendChild(d);document.body.style.overflow="hidden";
+ const close=()=>{d.remove();document.body.style.overflow=""};
+ d.onclick=e=>{if(e.target===d)close()};$("#cx").onclick=close;
+ const chk=()=>$("#cs").disabled=!($("#ct").value.trim()&&$("#cb").value.trim());
+ $("#ct").oninput=chk;$("#cb").oninput=chk;$("#ct").focus();
+ $("#cf").onsubmit=e=>{e.preventDefault();const anon=$("#ca").checked;const p={id:Date.now(),author:anon?"Anonymous":ME,anon,cat:$("#cc").value,t:Date.now(),title:$("#ct").value.trim(),body:$("#cb").value.trim(),relate:0,mine:true,best:null,advice:[]};S.posts.unshift(p);save();close();location.hash="post-"+p.id;toast("Posted. Advice usually starts coming in soon.")};
+}
+
+function route(){
+ const m=location.hash.match(/^#post-(\d+)$/);
+ const p=m&&S.posts.find(x=>x.id===+m[1]);
+ window.scrollTo(0,0);
+ p?detail(p):feed();
+}
+addEventListener("hashchange",route);
+route();
+}
+</script>
+</body></html>
