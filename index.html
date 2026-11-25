@@ -157,7 +157,9 @@ const bellIc=`<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"
 const backIc=`<svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M12 4l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const centsLine=n=>n===1?"1 person gave their 2 cents":n+" people gave their 2 cents";
 function toast(m){const el=$("#toast");el.textContent=m;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2600)}
-function bar(left){const u=unread();$("#barIn").innerHTML=`${left}<span class="sp"></span><button class="me" id="meB" title="Your alias">${av(S.me.alias)}${esc(S.me.alias)}</button><button class="bell" id="bellB" aria-label="Notifications${u?", "+u+" new":""}">${bellIc}${u?`<span class="dot">${u}</span>`:""}</button>`;$("#bellB").onclick=()=>{location.hash="inbox"};$("#meB").onclick=aliasSheet;const b=$("#back");if(b)b.onclick=()=>{history.length>1?history.back():location.hash=""}}
+function bar(left){const u=unread();$("#barIn").innerHTML=`${left}<span class="sp"></span><button class="me" id="meB" title="Your alias">${av(S.me.alias)}${esc(S.me.alias)}</button><button class="bell" id="bellB" aria-label="Notifications${u?", "+u+" new":""}">${bellIc}${u?`<span class="dot">${u}</span>`:""}</button>`;$("#bellB").onclick=()=>{location.hash="inbox"};$("#meB").onclick=aliasSheet;const b=$("#back");if(b)b.onclick=goBack}
+const trail=[];let cur=location.hash,backing=false;
+function goBack(){backing=true;const to=trail.pop()||"";if(to===location.hash){backing=false;route()}else location.hash=to}
 
 function feed(){
  bar(`<div class="logo">${logo}SafeSpace</div>`);
@@ -239,7 +241,7 @@ function route(keep){
  if(!keep)window.scrollTo(0,0);
  h==="#inbox"?inbox():p?detail(p):feed();
 }
-addEventListener("hashchange",()=>route());
+addEventListener("hashchange",()=>{if(!backing&&cur!==location.hash)trail.push(cur);backing=false;cur=location.hash;route()});
 route();
 }
 </script>
